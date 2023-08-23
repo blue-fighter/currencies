@@ -1,0 +1,4 @@
+api.exchange_rate:
+    path: /exchange_rate
+    methods: [ GET ]
+    controller: Application\Controllers\ExchangeRateController::execute

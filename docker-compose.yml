@@ -1,0 +1,94 @@
+version: "3"
+services:
+
+  currencies-postgres:
+    image: postgres:15-alpine
+    container_name: currencies-postgres
+    networks:
+      - currencies
+    volumes:
+      - currencies-postgres:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: currencies
+      POSTGRES_USER: currencies
+      POSTGRES_PASSWORD: currencies
+    ports:
+      - "5433:5432"
+    restart: always
+
+  currencies-webserver:
+    image: nginx:alpine
+    container_name: currencies-nginx
+    working_dir: /application
+    networks:
+      - currencies
+    volumes:
+      - .:/application
+      - ./nginx-config/default.nginx:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - currencies-app
+    ports:
+      - "8084:80"
+
+  currencies-app:
+    container_name: currencies-app
+    build: .
+    environment:
+      DATABASE_URL: "postgresql://currencies:currencies@currencies-postgres:5432/currencies?serverVersion=15&charset=utf8"
+      MESSENGER_TRANSPORT_DSN: "redis://currencies-redis:6379/messages"
+    networks:
+      - currencies
+    volumes:
+      - .:/application
+    depends_on:
+      - currencies-postgres
+      - currencies-redis
+    restart: always
+
+  currencies-consumer:
+    container_name: currencies-consumer
+    build: .
+    environment:
+      DATABASE_URL: "postgresql://currencies:currencies@currencies-postgres:5432/currencies?serverVersion=15&charset=utf8"
+      MESSENGER_TRANSPORT_DSN: "redis://currencies-redis:6379/messages"
+    working_dir: /application
+    networks:
+      - currencies
+    volumes:
+      - .:/application
+    depends_on:
+      - currencies-postgres
+      - currencies-redis
+    restart: always
+    command: /application/bin/console messenger:consume --limit=50
+
+  currencies-migrate:
+    build: .
+    working_dir: /application
+    environment:
+      DATABASE_URL: "postgresql://currencies:currencies@currencies-postgres:5432/currencies?serverVersion=15&charset=utf8"
+      MESSENGER_TRANSPORT_DSN: "redis://currencies-redis:6379/messages"
+    networks:
+      - currencies
+    volumes:
+      - .:/application
+    depends_on:
+      - currencies-postgres
+      - currencies-redis
+    command: /application/bin/console doctrine:migrations:migrate --no-interaction
+
+  currencies-redis:
+    image: redis:7.0.12
+    container_name: currencies-redis
+    networks:
+      - currencies
+    volumes:
+      - currencies-redis:/data
+    restart: always
+
+volumes:
+  currencies-postgres:
+  currencies-redis:
+
+networks:
+  currencies:
