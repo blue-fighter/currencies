@@ -39,7 +39,10 @@ services:
     networks:
       - currencies
     volumes:
-      - .:/application
+      - ./bin:/application/bin
+      - ./config:/application/config
+      - ./public:/application/public
+      - ./src:/application/src
     depends_on:
       - currencies-postgres
       - currencies-redis
@@ -55,7 +58,9 @@ services:
     networks:
       - currencies
     volumes:
-      - .:/application
+      - ./bin:/application/bin
+      - ./config:/application/config
+      - ./src:/application/src
     depends_on:
       - currencies-postgres
       - currencies-redis
@@ -71,7 +76,10 @@ services:
     networks:
       - currencies
     volumes:
-      - .:/application
+      - ./bin:/application/bin
+      - ./config:/application/config
+      - ./src:/application/src
+      - ./migrations:/application/migrations
     depends_on:
       - currencies-postgres
       - currencies-redis
