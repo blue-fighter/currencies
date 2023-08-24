@@ -14,4 +14,6 @@
 * `sourceCurrencyCode` ISO 4217 Currency Code
 
 ### Console command
-Run `docker exec -it currencies-app ./bin/console app:collect-data` to collect data for 180 days
+To collect data for 180 days run `docker exec -it currencies-app ./bin/console app:collect-data`
+
+or `docker exec  currencies-app ./bin/console app:collect-data --no-interaction`
