@@ -8,7 +8,7 @@ use CBRBundle\Exceptions\CBRException;
 use CBRBundle\Services\GetDayRateServiceInterface;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
+use Throwable;
 
 readonly class DownloadRatesService implements DownloadRatesServiceInterface
 {
@@ -38,7 +38,7 @@ readonly class DownloadRatesService implements DownloadRatesServiceInterface
             try {
                 $this->createCurrencyService->execute($createCurrencyRequest);
                 $this->entityManager->flush();
-            } catch (UniqueConstraintViolationException){
+            } catch (Throwable){
                 // No processing required
             }
 
